@@ -16,13 +16,28 @@
                                             Поділіться посиланням на цю сторінку в соціальних мережах із закликом підтримати ініціативу по переводу послуги в електронний вигляд.
                                             <br>
                                             <center>
-                                                <div class="pluso" style="margin-top:10px;"
-                                                         data-background="transparent"
-                                                         data-options="big,round,line,horizontal,counter,theme=04"
-                                                         data-title="Закликаю владу перевести цю послугу в електронну форму! {{data.city.sName}} – {{service.sName}}"
-                                                         data-description="{{data.city.sName}} – {{service.sName}}"
-                                                         data-services="facebook,vkontakte,twitter">
-                                                </div>
+
+                                                <ul ng-social-buttons
+                                                    data-url="'http://news.mistinfo.com/'"
+                                                    data-title="'test'"
+                                                    data-description="'test2'"
+                                                    data-image="'http://s3.mistinfo.com/32/d8/32d8eab76f4c242f665bda66b5edc6c5.jpg'" >
+                                                    <li class="ng-social-facebook">Facebook</li>
+                                                    <li class="ng-social-vk">Вконтакте</li>
+                                                    <li class="ng-social-twitter">Twitter</li>
+                                                </ul>
+
+                                                <a ng-click="facebook('URL','Закликаю владу перевести цю послугу в електронну форму! {{data.city.sName}} – {{service.sName}}','IMG_PATH','{{data.city.sName}} – {{service.sName}}')">
+                                                    <img src="img/icons/fb.png" alt="share via facebook" />
+
+                                                </a>
+                                                <a ng-click="vkontakte('URL','Закликаю владу перевести цю послугу в електронну форму! {{data.city.sName}} – {{service.sName}}','IMG_PATH','{{data.city.sName}} – {{service.sName}}')">
+                                                    <img src="img/icons/vk.png" alt="share via vk" />
+                                                </a>
+
+                                                <a ng-click="twitter('URL','Закликаю владу перевести цю послугу в електронну форму! {{data.city.sName}} – {{service.sName}}')">
+                                                    <img src="img/icons/tw.png" alt="share via twitter" />
+                                                </a>
                                             </center>
                                         </td>
                                         <td style="vertical-align:top;width:50%;">

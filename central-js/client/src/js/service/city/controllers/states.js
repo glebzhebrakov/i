@@ -81,6 +81,8 @@ define('state/service/city/controller', ['angularAMD'], function (angularAMD) {
 	]);
 });
 
+
+
 define('state/service/city/absent/controller', ['angularAMD'], function (angularAMD) {
 	angularAMD.controller('ServiceCityAbsentController', [
         '$state',
@@ -97,15 +99,37 @@ define('state/service/city/absent/controller', ['angularAMD'], function (angular
         ) {
             $scope.service = service;
             $scope.hiddenCtrls = true; // $rootScope.hiddenCtrls; //Admin buttons visibility handling
-            (function() {
-                if (window.pluso)if (typeof window.pluso.start == "function") return;
-                if (window.ifpluso==undefined) { window.ifpluso = 1;
-                    var d = document, s = d.createElement('script'), g = 'getElementsByTagName';
-                    s.type = 'text/javascript'; s.charset='UTF-8'; s.async = true;
-                    s.src = ('https:' == window.location.protocol ? 'https' : 'http')  + '://share.pluso.ru/pluso-like.js';
-                    var h=d[g]('body')[0];
-                    h.appendChild(s);
-                }})();
+
+
+				$scope.vkontakte = function(purl, ptitle, pimg, text) {
+					url  = 'http://vkontakte.ru/share.php?';
+					url += 'url='          + encodeURIComponent(purl);
+					url += '&title='       + encodeURIComponent(ptitle);
+					url += '&description=' + encodeURIComponent(text);
+					url += '&image='       + encodeURIComponent(pimg);
+					url += '&noparse=true';
+					$scope.sharePopup(url);
+				},
+				$scope.facebook = function(purl, ptitle, pimg, text) {
+					url  = 'http://www.facebook.com/sharer.php?s=100';
+					url += '&p[title]='     + encodeURIComponent(ptitle);
+					url += '&p[summary]='   + encodeURIComponent(text);
+					url += '&p[url]='       + encodeURIComponent(purl);
+					url += '&p[images][0]=' + encodeURIComponent(pimg);
+					$scope.sharePopup(url);
+				},
+				$scope.twitter = function(purl, ptitle) {
+					url  = 'http://twitter.com/share?';
+					url += 'text='      + encodeURIComponent(ptitle);
+					url += '&url='      + encodeURIComponent(purl);
+					url += '&counturl=' + encodeURIComponent(purl);
+					$scope.sharePopup(url);
+				},
+
+				$scope.sharePopup = function(url) {
+					window.open(url,'','toolbar=0,status=0,width=626,height=436');
+				};
+
             
             /*(function() {
                 if (window.pluso)if (typeof window.pluso.start == "function") return;

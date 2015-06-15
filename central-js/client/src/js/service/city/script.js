@@ -1,5 +1,5 @@
 define('service.general.city', ['angularAMD', 'service.general.city.link', 'service.general.city.built-in'], function (angularAMD) {
-    var app = angular.module('service.general.city', []);
+    var app = angular.module('service.general.city', ['ngSocial']);
 
     app.config(['$stateProvider', function ($stateProvider) {
         $stateProvider
