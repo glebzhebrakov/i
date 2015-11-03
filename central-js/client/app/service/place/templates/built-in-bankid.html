@@ -17,8 +17,12 @@
 
   <div class="list-group-item">
     <div class="row">
-      <div class="col-md-12">Крок 3.
+      <div class="col-md-6 pull-left">Крок 3.
         {{data.formData.params["processName"].name==null?"":data.formData.params["processName"].name}}
+      </div>
+      <div class="col-md-6 pull-right">
+        <label for="ref" class="pull-right"> Заповнення референтом</label>
+        <input type="checkbox" id="ref" class="pull-right">
       </div>
     </div>
     <div class="row">
