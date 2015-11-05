@@ -250,8 +250,11 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
           $scope.data.formData.params[field.id].value="";
         }
       });
-      $scope.data.formData.params['bankId_scan_passport'].upload = true;
-      $scope.data.formData.params['bankId_scan_passport'].scan = null;
+      if ($scope.data.formData.params['bankId_scan_passport']){
+        $scope.data.formData.params['bankId_scan_passport'].upload = true;
+        $scope.data.formData.params['bankId_scan_passport'].scan = null;
+      }
+
     } else {
       angular.forEach($scope.activitiForm.formProperties, function (field){
         if (field.id.toLowerCase().startsWith('bankid')){
@@ -260,8 +263,12 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
           };
         }
       });
-      $scope.data.formData.params['bankId_scan_passport'].upload = false;
-      $scope.data.formData.params['bankId_scan_passport'].scan = $scope.data.immutableFormData.params['bankId_scan_passport'].scan;
+
+      if ($scope.data.formData.params['bankId_scan_passport']){
+        $scope.data.formData.params['bankId_scan_passport'].upload = false;
+        $scope.data.formData.params['bankId_scan_passport'].scan = $scope.data.immutableFormData.params['bankId_scan_passport'].scan;
+      }
+
     }
   };
 
