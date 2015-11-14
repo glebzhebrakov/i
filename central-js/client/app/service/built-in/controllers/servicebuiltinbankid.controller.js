@@ -229,7 +229,7 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
   };
 
   function getFieldProps(property) {
-    if ($scope.referent && property.id.toLowerCase().startsWith('bankid')){
+    if ($scope.referent && property.id.startsWith('bankId')){
       return {
         mentionedInWritable: true,
         fieldES: 1, //EDITABLE
@@ -246,7 +246,7 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
   $scope.onReferent = function (){
     if ($scope.referent){
       angular.forEach($scope.activitiForm.formProperties, function (field){
-        if (field.id.toLowerCase().startsWith('bankid')){
+        if (field.id.startsWith('bankId') && field.id != 'bankId_scan_passport'){
           $scope.data.formData.params[field.id].value="";
         }
       });
@@ -257,10 +257,10 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
 
     } else {
       angular.forEach($scope.activitiForm.formProperties, function (field){
-        if (field.id.toLowerCase().startsWith('bankid')){
+        if (field.id.startsWith('bankId')){
           if (!$scope.data.formData.params[field.id].value){
             $scope.data.formData.params[field.id].value = $scope.data.immutableFormData.params[field.id].value;
-          };
+          }
         }
       });
 
@@ -274,7 +274,7 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
 
   $scope.showFormField = function(property) {
     var p = getFieldProps(property);
-    if ($scope.referent && property.id.toLowerCase().startsWith('bankid')){
+    if ($scope.referent && property.id.startsWith('bankId')){
       return true;
     }
     if (p.mentionedInWritable)
@@ -288,7 +288,7 @@ angular.module('app').controller('ServiceBuiltInBankIDController', function(
   };
 
   $scope.renderAsLabel = function(property) {
-    if ($scope.referent && property.id.toLowerCase().startsWith('bankid')){
+    if ($scope.referent && property.id.startsWith('bankId')){
       return false;
     }
     var p = getFieldProps(property);
