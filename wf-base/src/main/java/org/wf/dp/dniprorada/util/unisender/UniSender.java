@@ -134,7 +134,7 @@ public class UniSender {
 
     public UniResponse createEmailMessage(String sFromName, String sFromMail, String sSubject, String sBody,
             String sID_List) {
-
+        oLog.info("sSubject: {}", sSubject);
         CreateEmailMessageRequest oCreateEmailMessageRequest = CreateEmailMessageRequest
                 .getBuilder(this.sAuthKey, this.sLang)
                 .setSenderName(sFromName)
@@ -143,6 +143,7 @@ public class UniSender {
                 .setBody(sBody)
                 .setListId(sID_List)
                 .build();
+        oLog.info("!sSubject: {}", oCreateEmailMessageRequest.getSubject());
         return createEmailMessage(oCreateEmailMessageRequest);
     }
 
@@ -158,11 +159,14 @@ public class UniSender {
         mParamObject.add("api_key", sAuthKey);
         mParamObject.add("sender_name", oCreateEmailMessageRequest.getSenderName());
         mParamObject.add("sender_email", oCreateEmailMessageRequest.getSenderEmail());
+        mParamObject.add("lang", "ua");
+        
         //parametersMap.add("subject", createEmailMessageRequest.getSubject());
         //String subject = createEmailMessageRequest.getSubject() == null || "".equals(createEmailMessageRequest.getSubject()) ? " " : createEmailMessageRequest.getSubject();
-        mParamByteArray.add("subject", new ByteArrayResource(oCreateEmailMessageRequest.getSubject().getBytes(StandardCharsets.UTF_8)));
+        /*mParamByteArray.add("subject", new ByteArrayResource(oCreateEmailMessageRequest.getSubject().getBytes(StandardCharsets.UTF_8)));
         String sBody = oCreateEmailMessageRequest.getSubject() + " | " +  oCreateEmailMessageRequest.getBody();
-        mParamByteArray.add("body", new ByteArrayResource(sBody.getBytes(StandardCharsets.UTF_8)));
+        oLog.info("!sBody: {}", sBody);
+        mParamByteArray.add("body", new ByteArrayResource(sBody.getBytes(StandardCharsets.UTF_8)));*/
         mParamObject.add("list_id", oCreateEmailMessageRequest.getListId());
         //optional
         if (!StringUtils.isBlank(oCreateEmailMessageRequest.getTextBody()))
@@ -176,8 +180,12 @@ public class UniSender {
         Map<String, ByteArrayResource> mAttachment = oCreateEmailMessageRequest.getAttachments();
         for (String sFileName : mAttachment.keySet()) {
             ByteArrayResource oAttachment = mAttachment.get(sFileName);
-            mParamByteArray.add("oAttachment[" + sFileName + "]", oAttachment);
+            mParamByteArray.add("attachments[" + sFileName + "]", oAttachment);
         }
+        mParamByteArray.add("subject", new ByteArrayResource(oCreateEmailMessageRequest.getSubject().getBytes(StandardCharsets.UTF_8)));
+        String sBody = /*oCreateEmailMessageRequest.getSubject();// + " | " +*/  oCreateEmailMessageRequest.getBody();
+        oLog.info("!sBody: {}", sBody);
+        mParamByteArray.add("body", new ByteArrayResource(sBody.getBytes(StandardCharsets.UTF_8)));
 
         if (!StringUtils.isBlank(oCreateEmailMessageRequest.getLang()))
             //parametersMap.add("lang", createEmailMessageRequest.getLang());
@@ -201,7 +209,7 @@ public class UniSender {
         return oUniResponse;
     }
 
-    public UniResponse createCampaign(CreateCampaignRequest oCreateCampaignRequest) {
+    public UniResponse createCampaign(CreateCampaignRequest oCreateCampaignRequest, String sToMail) {
 
         MultiValueMap<String, Object> mParam = new LinkedMultiValueMap<String, Object>();
 
@@ -211,7 +219,7 @@ public class UniSender {
         mParam.add("format", "json");
         mParam.add("api_key", sAuthKey);
         mParam.add("message_id", oCreateCampaignRequest.getMessageId());
-
+        mParam.add("contacts", sToMail);
         oLog.info("RESULT osURL: {}", osURL.toString());
         oLog.info("RESULT mParam: {}", mParam);
 
@@ -249,10 +257,12 @@ public class UniSender {
                 //partHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
                 List<ByteArrayResource> aByteArray_Part = mParamByteArray.get(sFileName);
                 HttpEntity<ByteArrayResource> oByteArray_Part = new HttpEntity<ByteArrayResource>(aByteArray_Part.get(0), oHttpHeaders_Part); //HttpEntity<ByteArrayResource> bytesPart = new HttpEntity<ByteArrayResource>(bars.get(i), partHeaders);
+                oLog.info("!sFileName: {}", sFileName);
                 mParamObject.add(sFileName, oByteArray_Part);
             }
         }
         //result HTTP Request httpEntity
+        oLog.info("!!!!!!!!!!!before send RESULT mParamObject: {}", mParamObject);
         HttpEntity oHttpEntity = new HttpEntity(mParamObject, oHttpHeaders);
         ResponseEntity<String> osResponseEntity = oRestTemplate.postForEntity(sURL, oHttpEntity, String.class);
         oLog.info("RESULT sURL == {}, osResponseEntity(JSON) : {}", sURL, osResponseEntity);
