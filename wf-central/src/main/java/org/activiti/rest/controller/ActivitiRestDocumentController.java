@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.wf.dp.dniprorada.base.util.JSExpressionUtil;
 import org.wf.dp.dniprorada.base.util.JsonRestUtils;
 import org.wf.dp.dniprorada.constant.Currency;
 import org.wf.dp.dniprorada.constant.HistoryEventMessage;
@@ -33,10 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/services")
@@ -62,6 +60,9 @@ public class ActivitiRestDocumentController {
     private SubjectOrganDao subjectOrganDao;
 
     @Autowired
+    private SubjectOrganJoinAttributeDao subjectOrganJoinAttributeDao;
+
+    @Autowired
     private DocumentContentTypeDao documentContentTypeDao;
     @Autowired
     private DocumentTypeDao documentTypeDao;
@@ -79,7 +80,7 @@ public class ActivitiRestDocumentController {
     public
     @ResponseBody
     Document getDocument(@RequestParam(value = "nID") Long id,
-            @RequestParam(value = "nID_Subject") long nID_Subject) throws ActivitiRestException {
+                         @RequestParam(value = "nID_Subject") long nID_Subject) throws ActivitiRestException {
         Document document = documentDao.getDocument(id);
         if (nID_Subject != document.getSubject().getId()) {
             throw new ActivitiRestException(UNAUTHORIZED_ERROR_CODE,
@@ -99,7 +100,7 @@ public class ActivitiRestDocumentController {
      */
     @RequestMapping(value = "/getDocumentAccessByHandler",
             method = RequestMethod.GET,
-            headers = { "Accept=application/json" })
+            headers = {"Accept=application/json"})
     public
     @ResponseBody
     Document getDocumentAccessByHandler(
@@ -134,7 +135,7 @@ public class ActivitiRestDocumentController {
      */
     @RequestMapping(value = "/getDocumentOperators",
             method = RequestMethod.GET,
-            headers = { "Accept=application/json" })
+            headers = {"Accept=application/json"})
     public
     @ResponseBody
     List<DocumentOperator_SubjectOrgan> getDocumentOperators() {
@@ -150,7 +151,7 @@ public class ActivitiRestDocumentController {
     public
     @ResponseBody
     String getDocumentContent(@RequestParam(value = "nID") Long id,
-            @RequestParam(value = "nID_Subject") long nID_Subject) throws ActivitiRestException {
+                              @RequestParam(value = "nID_Subject") long nID_Subject) throws ActivitiRestException {
         Document document = documentDao.getDocument(id);
         if (nID_Subject != document.getSubject().getId()) {
             throw new ActivitiRestException(UNAUTHORIZED_ERROR_CODE, NO_ACCESS_MESSAGE);
@@ -438,17 +439,84 @@ public class ActivitiRestDocumentController {
 
     @RequestMapping(value = "/getSubjectOrganJoins",
             method = RequestMethod.GET,
-            headers = { "Accept=application/json" })
+            headers = {"Accept=application/json"})
     public
     @ResponseBody
     List<SubjectOrganJoin> getAllSubjectOrganJoins(
-            @RequestParam(value = "nID_SubjectOrgan") Long organID,
-            @RequestParam(value = "nID_Region", required = false) Long regionID,
-            @RequestParam(value = "nID_City", required = false) Long cityID,
-            @RequestParam(value = "sID_UA", required = false) String uaID
+            @RequestParam(value = "nID_SubjectOrgan") Long nID_SubjectOrgan,
+            @RequestParam(value = "nID_Region", required = false) Long nID_Region,
+            @RequestParam(value = "nID_City", required = false) Long nID_City,
+            @RequestParam(value = "sID_UA", required = false) String sID_UA,
+            @RequestParam(value = "bIncludeAttributes", required = false, defaultValue = "false") Boolean bIncludeAttributes,
+            @RequestParam(value = "mAttributeCustom", required = false) String smAttributeCustom //Map<String, String> mAttributeCustom
     ) {
-        return subjectOrganDao.findSubjectOrganJoinsBy(organID, regionID, cityID, uaID);
+        
+        List<SubjectOrganJoin> aSubjectOrganJoin = subjectOrganDao.findSubjectOrganJoinsBy(nID_SubjectOrgan, nID_Region, nID_City, sID_UA);
+        if (bIncludeAttributes == false) {
+            return aSubjectOrganJoin;
+        }
+        
+        Map<String, String> mAttributeCustom = JsonRestUtils.readObject(smAttributeCustom, Map.class);
+        LOG.info("[getAllSubjectOrganJoins](smAttributeCustom="+smAttributeCustom+",mAttributeCustom="+mAttributeCustom+"):");
+        
+        Map<String, Object> mAttributeReturn = new HashMap();
+        //mAttributeAll.putAll(mAttributeCustom);
+        //Map<String, String> jsonData = new HashMap<>();
+
+        for (SubjectOrganJoin oSubjectOrganJoin : aSubjectOrganJoin) {
+            mAttributeReturn = new HashMap();
+            List<SubjectOrganJoinAttribute> aSubjectOrganJoinAttribute = subjectOrganJoinAttributeDao.getSubjectOrganJoinAttributes(oSubjectOrganJoin);
+            if (aSubjectOrganJoinAttribute != null) {
+                //oSubjectOrganJoin.addAttributeList(aSubjectOrganJoinAttribute);
+                
+                mAttributeReturn = new HashMap(mAttributeCustom);
+                for (Map.Entry<String, String> oAttributeCustom : mAttributeCustom.entrySet()) {
+                    oSubjectOrganJoin.addAttribute(oAttributeCustom.getKey(), oAttributeCustom.getValue());
+                }
+                
+                for (SubjectOrganJoinAttribute oSubjectOrganJoinAttribute : aSubjectOrganJoinAttribute) {
+                    if (!oSubjectOrganJoinAttribute.getValue().startsWith("=")) {
+                        mAttributeReturn.put(oSubjectOrganJoinAttribute.getName(), oSubjectOrganJoinAttribute.getValue());
+                        oSubjectOrganJoin.addAttribute(oSubjectOrganJoinAttribute.getName(), oSubjectOrganJoinAttribute.getValue());
+                        //oSubjectOrganJoinAttribute.setValue(getCalculatedFormulaValue(oSubjectOrganJoinAttribute.getValue(), mAttributeReturn));
+                    }
+                }
+                for (SubjectOrganJoinAttribute oSubjectOrganJoinAttribute : aSubjectOrganJoinAttribute) {
+                    if (oSubjectOrganJoinAttribute.getValue().startsWith("=")) {
+                        oSubjectOrganJoinAttribute.setValue(getCalculatedFormulaValue(oSubjectOrganJoinAttribute.getValue(), mAttributeReturn));
+                        mAttributeReturn.put(oSubjectOrganJoinAttribute.getName(), oSubjectOrganJoinAttribute.getValue());
+                        oSubjectOrganJoin.addAttribute(oSubjectOrganJoinAttribute.getName(), oSubjectOrganJoinAttribute.getValue());
+                    }
+                }
+            }
+        }
+        LOG.info("[getAllSubjectOrganJoins](mAttributeReturn="+mAttributeReturn+"):");
+        return aSubjectOrganJoin;
     }
+
+    private String getCalculatedFormulaValue(String sFormulaOriginal, Map<String, Object> mParam) {//String
+        String sReturn = null;
+        String sFormula=sFormulaOriginal;
+        if(sFormula==null || "".equals(sFormula.trim())){
+                LOG.warn("[getCalculatedFormulaValue](sFormula="+sFormula+",mParam="+mParam+"):");
+        }else{
+            for (Map.Entry<String, ?> oParam : mParam.entrySet()) {
+                String sValue = (String)oParam.getValue();
+                sFormula = sFormula.replaceAll("\\Q["+oParam.getKey()+"]\\E",sValue);
+            }
+            try{
+                Map<String, Object> m = new HashMap<String, Object>();
+                Object o = new JSExpressionUtil().getObjectResultOfCondition(m, mParam, sFormula); //getResultOfCondition
+                sReturn = "" + o;
+                LOG.info("[getCalculatedFormulaValue](sFormulaOriginal="+sFormulaOriginal+",sFormula="+sFormula+",mParam="+mParam+",sReturn="+sReturn+"):");
+            }catch(Exception oException){
+                LOG.error("[getCalculatedFormulaValue](sFormulaOriginal="+sFormulaOriginal+",sFormula="+sFormula+",mParam="+mParam+"):", oException);
+            }
+        }
+        return sReturn;
+    }
+
+
 
     @RequestMapping(value = "/setSubjectOrganJoin",
             method = RequestMethod.GET,

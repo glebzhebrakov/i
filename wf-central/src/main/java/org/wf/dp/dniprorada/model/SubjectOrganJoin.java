@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wf.dp.dniprorada.base.model.Entity;
 
 import javax.persistence.Column;
+import javax.persistence.OneToMany;
+import javax.persistence.FetchType;
+import java.util.ArrayList;
+import java.util.List;
+import org.hibernate.annotations.Type;
 
 /**
  * @author dgroup
@@ -54,6 +59,9 @@ public class SubjectOrganJoin extends Entity {
     @JsonProperty(value = "sID_UA")
     @Column(name = "sID_UA")
     private String uaId;
+
+    @OneToMany(targetEntity = SubjectOrganJoinAttribute.class, mappedBy = "subjectOrganJoinId", fetch = FetchType.EAGER)
+    private List<SubjectOrganJoinAttribute> aAttribute = new ArrayList<>();
 
     public Long getSubjectOrganId() {
         return subjectOrganId;
@@ -135,6 +143,27 @@ public class SubjectOrganJoin extends Entity {
         this.uaId = uaId;
     }
 
+    public List<SubjectOrganJoinAttribute> getaAttribute() {
+        return aAttribute;
+    }
+
+    public void addAttributeList(List<SubjectOrganJoinAttribute> aSubjectOrganJoinAttribute){
+        if(aSubjectOrganJoinAttribute != null) {
+            for(SubjectOrganJoinAttribute oSubjectOrganJoinAttribute: aSubjectOrganJoinAttribute){
+            aAttribute.add(oSubjectOrganJoinAttribute);
+            }
+        }
+    }
+
+    public void addAttribute(String sName, String sValue){
+        SubjectOrganJoinAttribute oSubjectOrganJoinAttribute = new SubjectOrganJoinAttribute();
+        //oSubjectOrganJoinAttribute.setId(getId());
+        oSubjectOrganJoinAttribute.setSubjectOrganJoinId(getId());
+        oSubjectOrganJoinAttribute.setName(sName);
+        oSubjectOrganJoinAttribute.setValue(sValue);
+        aAttribute.add(oSubjectOrganJoinAttribute);
+    }
+    
     @Override
     public String toString() {
         return "SubjectOrganJoin{id='" + getId() + '\'' +
@@ -148,6 +177,7 @@ public class SubjectOrganJoin extends Entity {
                 ", regionId='" + regionId + '\'' +
                 ", cityId='" + cityId + '\'' +
                 ", UA_ID='" + uaId + '\'' +
+                ", attributes=" + aAttribute +'\'' +
                 '}';
     }
 }
