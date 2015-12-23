@@ -1,18 +1,18 @@
-<div class="container">
-  <div class="row">
-    <span>Вiдгук вже залишен</span>
+<div class="container" ng-hide="messageError">
+  <div class="row" ng-show="commentExist">
+    <span>Вiдгук вже залишен: {{commentDate}}</span>
   </div>
-  <div class="row">
+  <div class="row" ng-hide="commentExist">
     <span>Залиште свiй вiдгук</span>
   </div>
-  <div class="row">
-    <span>shead</span>
+  <div class="row" ng-hide="commentExist">
+    <span>{{commentHead}}</span>
   </div>
-  <div class="row">
-    <textarea rows="5" class="form-control" style="width: 500px !important;">textarea</textarea>
+  <div class="row" ng-hide="commentExist">
+    <textarea rows="5" ng-model="commentBody" class="form-control" style="width: 500px !important;"></textarea>
   </div>
-  <div class="row">
-    <input type="button" class="btn btn-info" value="Залишити" />
+  <div class="row" ng-hide="commentExist">
+    <input type="button" class="btn btn-info" value="Залишити вiдгук" ng-click="postComment()" />
   </div>
 
 </div>
